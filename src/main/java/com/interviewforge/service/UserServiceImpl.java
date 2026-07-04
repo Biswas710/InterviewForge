@@ -1,10 +1,12 @@
 package com.interviewforge.service;
 
+import com.interviewforge.dto.LoginRequest;
 import com.interviewforge.dto.RegisterRequest;
 import com.interviewforge.entity.Role;
 import com.interviewforge.entity.User;
 import com.interviewforge.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -12,7 +14,7 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-
+    private final PasswordEncoder passwordEncoder;
     @Override
     public String register(RegisterRequest request) {
 
@@ -24,7 +26,7 @@ public class UserServiceImpl implements UserService {
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())
-                .password(request.getPassword())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER)
                 .enabled(true)
                 .build();
@@ -32,5 +34,21 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
 
         return "User registered successfully";
+    }
+
+    @Override
+    public String login(LoginRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElse(null);
+
+        if (user == null) {
+            return "User not found";
+        }
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            return "Invalid password";
+        }
+
+        return "Login successful";
     }
 }
