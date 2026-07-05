@@ -1,6 +1,7 @@
 package com.interviewforge.controller;
 
 import com.interviewforge.dto.LoginRequest;
+import com.interviewforge.dto.LoginResponse;
 import com.interviewforge.dto.RegisterRequest;
 import com.interviewforge.service.UserService;
 import jakarta.validation.Valid;
@@ -21,7 +22,9 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+
         return ResponseEntity.ok(userService.login(request));
+
     }
 }
