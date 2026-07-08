@@ -24,5 +24,24 @@ public class InterviewController {
     @GetMapping
     public List<InterviewResponse> getMyInterviews() {
         return interviewService.getMyInterviews();
+
+    }
+    @GetMapping("/{id}")
+    public InterviewResponse getInterviewById(@PathVariable Long id) {
+
+        return interviewService.getInterviewById(id);
+
+    }
+    @PutMapping("/{id}")
+    public String updateInterview(@PathVariable Long id,
+                                  @RequestBody InterviewRequest request) {
+
+        return interviewService.updateInterview(id, request);
+    }
+    @DeleteMapping("/{id}")
+    public String deleteInterview(@PathVariable Long id) {
+
+        return interviewService.deleteInterview(id);
+
     }
 }

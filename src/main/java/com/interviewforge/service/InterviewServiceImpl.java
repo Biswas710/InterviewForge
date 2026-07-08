@@ -22,15 +22,7 @@ public class InterviewServiceImpl implements InterviewService {
     @Override
     public String createInterview(InterviewRequest request) {
 
-        Authentication authentication =
-                org.springframework.security.core.context.SecurityContextHolder
-                        .getContext()
-                        .getAuthentication();
-
-        String email = authentication.getName();
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = getCurrentUser();
 
         Interview interview = Interview.builder()
                 .title(request.getTitle())
@@ -51,13 +43,7 @@ public class InterviewServiceImpl implements InterviewService {
     @Override
     public List<InterviewResponse> getMyInterviews() {
 
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
-
-        String email = authentication.getName();
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = getCurrentUser();
 
         return interviewRepository.findByUser(user)
                 .stream()
@@ -73,4 +59,72 @@ public class InterviewServiceImpl implements InterviewService {
                         .build())
                 .toList();
     }
+    private User getCurrentUser() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+    @Override
+    public InterviewResponse getInterviewById(Long id) {
+
+        User user = getCurrentUser();
+
+        Interview interview = interviewRepository
+                .findByIdAndUser(id, user)
+                .orElseThrow(() ->
+                        new RuntimeException("Interview not found"));
+
+        return InterviewResponse.builder()
+                .id(interview.getId())
+                .title(interview.getTitle())
+                .company(interview.getCompany())
+                .role(interview.getRole())
+                .difficulty(interview.getDifficulty())
+                .status(interview.getStatus())
+                .interviewDate(interview.getInterviewDate())
+                .description(interview.getDescription())
+                .build();
+    }
+    @Override
+    public String updateInterview(Long id, InterviewRequest request) {
+
+        User user = getCurrentUser();
+
+        Interview interview = interviewRepository
+                .findByIdAndUser(id, user)
+                .orElseThrow(() ->
+                        new RuntimeException("Interview not found"));
+
+        interview.setTitle(request.getTitle());
+        interview.setCompany(request.getCompany());
+        interview.setRole(request.getRole());
+        interview.setDifficulty(request.getDifficulty());
+        interview.setStatus(request.getStatus());
+        interview.setInterviewDate(request.getInterviewDate());
+        interview.setDescription(request.getDescription());
+
+        interviewRepository.save(interview);
+
+        return "Interview updated successfully";
+    }
+    @Override
+    public String deleteInterview(Long id) {
+
+        User user = getCurrentUser();
+
+        Interview interview = interviewRepository
+                .findByIdAndUser(id, user)
+                .orElseThrow(() ->
+                        new RuntimeException("Interview not found"));
+
+        interviewRepository.delete(interview);
+
+        return "Interview deleted successfully";
+    }
+
 }
