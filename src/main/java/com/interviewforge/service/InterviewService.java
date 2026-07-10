@@ -1,8 +1,9 @@
 package com.interviewforge.service;
 
+import com.interviewforge.dto.InterviewQuestionResponse;
 import com.interviewforge.dto.InterviewRequest;
 import com.interviewforge.dto.InterviewResponse;
-import com.interviewforge.dto.QuestionResponse;
+
 
 import java.util.List;
 
@@ -16,5 +17,5 @@ public interface InterviewService {
     String updateInterview(Long id, InterviewRequest request);
 
     String deleteInterview(Long id);
-
+    List<InterviewQuestionResponse> startInterview(Long interviewId);
 }

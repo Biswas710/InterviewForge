@@ -1,10 +1,13 @@
 package com.interviewforge.controller;
 
+import com.interviewforge.dto.InterviewQuestionResponse;
 import com.interviewforge.dto.InterviewRequest;
 import com.interviewforge.dto.InterviewResponse;
+
 import com.interviewforge.service.InterviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,5 +46,13 @@ public class InterviewController {
 
         return interviewService.deleteInterview(id);
 
+    }
+    @PostMapping("/{id}/start")
+    public ResponseEntity<List<InterviewQuestionResponse>> startInterview(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                interviewService.startInterview(id)
+        );
     }
 }

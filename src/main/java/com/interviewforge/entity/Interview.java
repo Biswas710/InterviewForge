@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "interviews")
@@ -31,6 +32,11 @@ public class Interview {
     private LocalDate interviewDate;
 
     private String description;
+    private Integer totalQuestions;
+
+    private Integer score;
+
+    private LocalDateTime completedAt;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

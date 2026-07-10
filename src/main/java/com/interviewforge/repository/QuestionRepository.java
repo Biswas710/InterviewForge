@@ -2,10 +2,25 @@ package com.interviewforge.repository;
 
 import com.interviewforge.entity.Question;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
 public interface QuestionRepository extends JpaRepository<Question, Long> {
+
     List<Question> findByCompanyIgnoreCase(String company);
 
+    @Query(value = """
+    SELECT * FROM questions
+    WHERE company = :company
+    AND difficulty = :difficulty
+    ORDER BY RAND()
+    LIMIT :limit
+    """, nativeQuery = true)
+    List<Question> findRandomQuestions(
+            @Param("company") String company,
+            @Param("difficulty") String difficulty,
+            @Param("limit") int limit
+    );
 }

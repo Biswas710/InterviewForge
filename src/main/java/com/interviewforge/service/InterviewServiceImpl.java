@@ -1,9 +1,12 @@
 package com.interviewforge.service;
 
+import com.interviewforge.dto.InterviewQuestionResponse;
 import com.interviewforge.dto.InterviewRequest;
 import com.interviewforge.entity.Interview;
+import com.interviewforge.entity.Question;
 import com.interviewforge.entity.User;
 import com.interviewforge.repository.InterviewRepository;
+import com.interviewforge.repository.QuestionRepository;
 import com.interviewforge.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -18,7 +21,7 @@ public class InterviewServiceImpl implements InterviewService {
 
     private final InterviewRepository interviewRepository;
     private final UserRepository userRepository;
-
+    private final QuestionRepository questionRepository;
     @Override
     public String createInterview(InterviewRequest request) {
 
@@ -125,6 +128,30 @@ public class InterviewServiceImpl implements InterviewService {
         interviewRepository.delete(interview);
 
         return "Interview deleted successfully";
+    }
+    @Override
+    public List<InterviewQuestionResponse> startInterview(Long interviewId) {
+
+        Interview interview = interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new RuntimeException("Interview not found"));
+
+        List<Question> questions = questionRepository.findRandomQuestions(
+                interview.getCompany(),
+                interview.getDifficulty(),
+                interview.getTotalQuestions()
+        );
+
+        interview.setStatus("IN_PROGRESS");
+        interviewRepository.save(interview);
+
+        return questions.stream()
+                .map(question -> InterviewQuestionResponse.builder()
+                        .id(question.getId())
+                        .topic(question.getTopic())
+                        .difficulty(question.getDifficulty())
+                        .question(question.getQuestion())
+                        .build())
+                .toList();
     }
 
 }
