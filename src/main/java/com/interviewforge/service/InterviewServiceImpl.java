@@ -1,18 +1,16 @@
 package com.interviewforge.service;
 
-import com.interviewforge.dto.InterviewQuestionResponse;
-import com.interviewforge.dto.InterviewRequest;
-import com.interviewforge.entity.Interview;
-import com.interviewforge.entity.Question;
-import com.interviewforge.entity.User;
-import com.interviewforge.repository.InterviewRepository;
-import com.interviewforge.repository.QuestionRepository;
-import com.interviewforge.repository.UserRepository;
+import com.interviewforge.dto.*;
+import com.interviewforge.entity.*;
+import com.interviewforge.repository.*;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import com.interviewforge.dto.InterviewResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -22,25 +20,71 @@ public class InterviewServiceImpl implements InterviewService {
     private final InterviewRepository interviewRepository;
     private final UserRepository userRepository;
     private final QuestionRepository questionRepository;
-    @Override
+    private final InterviewAnswerRepository interviewAnswerRepository;
+    private final InterviewQuestionRepository interviewQuestionRepository;
+   @Override
     public String createInterview(InterviewRequest request) {
 
         User user = getCurrentUser();
 
-        Interview interview = Interview.builder()
-                .title(request.getTitle())
-                .company(request.getCompany())
-                .role(request.getRole())
-                .difficulty(request.getDifficulty())
-                .status(request.getStatus())
-                .interviewDate(request.getInterviewDate())
-                .description(request.getDescription())
-                .user(user)
-                .build();
+       Interview interview = Interview.builder()
+               .title(request.getTitle())
+               .company(request.getCompany())
+               .role(request.getRole())
+               .difficulty(request.getDifficulty())
+               .status(request.getStatus())
+               .interviewDate(request.getInterviewDate())
+               .description(request.getDescription())
+               .totalQuestions(request.getTotalQuestions())
+               .user(user)
+               .build();
 
         interviewRepository.save(interview);
 
         return "Interview created successfully";
+    }
+
+    @Override
+    @Transactional
+    public void submitAnswers(Long interviewId,
+                              AnswerSubmissionRequest request) {
+
+        Interview interview = interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new RuntimeException("Interview not found"));
+
+        for (InterviewAnswerRequest answerRequest : request.getAnswers()) {
+
+            // Validate that this question belongs to this interview
+            boolean assigned = interviewQuestionRepository
+                    .existsByInterviewAndQuestionId(
+                            interview,
+                            answerRequest.getQuestionId()
+                    );
+
+            if (!assigned) {
+                throw new RuntimeException(
+                        "Question does not belong to this interview."
+                );
+            }
+
+            Question question = questionRepository.findById(
+                    answerRequest.getQuestionId()
+            ).orElseThrow(() ->
+                    new RuntimeException("Question not found"));
+
+            InterviewAnswer answer = InterviewAnswer.builder()
+                    .interview(interview)
+                    .question(question)
+                    .userAnswer(answerRequest.getUserAnswer())
+                    .build();
+
+            interviewAnswerRepository.save(answer);
+        }
+
+        interview.setStatus("COMPLETED");
+        interview.setCompletedAt(LocalDateTime.now());
+
+        interviewRepository.save(interview);
     }
 
     @Override
@@ -130,6 +174,7 @@ public class InterviewServiceImpl implements InterviewService {
         return "Interview deleted successfully";
     }
     @Override
+    @Transactional
     public List<InterviewQuestionResponse> startInterview(Long interviewId) {
 
         Interview interview = interviewRepository.findById(interviewId)
@@ -141,17 +186,38 @@ public class InterviewServiceImpl implements InterviewService {
                 interview.getTotalQuestions()
         );
 
+        interviewQuestionRepository.deleteAllByInterview(interview);
+
+        List<InterviewQuestionResponse> response = new ArrayList<>();
+
+        int order = 1;
+
+        for (Question question : questions) {
+
+            InterviewQuestion interviewQuestion = InterviewQuestion.builder()
+                    .interview(interview)
+                    .question(question)
+                    .questionOrder(order)
+                    .build();
+
+            interviewQuestionRepository.save(interviewQuestion);
+
+            response.add(
+                    InterviewQuestionResponse.builder()
+                            .id(question.getId())
+                            .topic(question.getTopic())
+                            .difficulty(question.getDifficulty())
+                            .question(question.getQuestion())
+                            .build()
+            );
+
+            order++;
+        }
+
         interview.setStatus("IN_PROGRESS");
         interviewRepository.save(interview);
 
-        return questions.stream()
-                .map(question -> InterviewQuestionResponse.builder()
-                        .id(question.getId())
-                        .topic(question.getTopic())
-                        .difficulty(question.getDifficulty())
-                        .question(question.getQuestion())
-                        .build())
-                .toList();
+        return response;
     }
 
 }

@@ -28,4 +28,5 @@ public class InterviewRequest {
     private LocalDate interviewDate;
 
     private String description;
+    private Integer totalQuestions;
 }

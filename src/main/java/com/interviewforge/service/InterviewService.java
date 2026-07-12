@@ -4,7 +4,7 @@ import com.interviewforge.dto.InterviewQuestionResponse;
 import com.interviewforge.dto.InterviewRequest;
 import com.interviewforge.dto.InterviewResponse;
 
-
+import com.interviewforge.dto.AnswerSubmissionRequest;
 import java.util.List;
 
 public interface InterviewService {
@@ -18,4 +18,5 @@ public interface InterviewService {
 
     String deleteInterview(Long id);
     List<InterviewQuestionResponse> startInterview(Long interviewId);
+    void submitAnswers(Long interviewId,AnswerSubmissionRequest request);
 }

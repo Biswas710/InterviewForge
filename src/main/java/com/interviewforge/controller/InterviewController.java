@@ -1,5 +1,6 @@
 package com.interviewforge.controller;
 
+import com.interviewforge.dto.AnswerSubmissionRequest;
 import com.interviewforge.dto.InterviewQuestionResponse;
 import com.interviewforge.dto.InterviewRequest;
 import com.interviewforge.dto.InterviewResponse;
@@ -54,5 +55,14 @@ public class InterviewController {
         return ResponseEntity.ok(
                 interviewService.startInterview(id)
         );
+    }
+    @PostMapping("/{id}/submit")
+    public ResponseEntity<String> submitAnswers(
+            @PathVariable Long id,
+            @RequestBody AnswerSubmissionRequest request) {
+
+        interviewService.submitAnswers(id, request);
+
+        return ResponseEntity.ok("Interview submitted successfully.");
     }
 }
