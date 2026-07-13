@@ -18,7 +18,8 @@ public class Question {
 
     @Column(nullable = false)
     private String company;
-
+    @Column(nullable = false)
+    private String role;
     @Column(nullable = false)
     private String topic;
 

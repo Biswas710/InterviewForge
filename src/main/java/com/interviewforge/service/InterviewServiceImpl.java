@@ -180,8 +180,9 @@ public class InterviewServiceImpl implements InterviewService {
         Interview interview = interviewRepository.findById(interviewId)
                 .orElseThrow(() -> new RuntimeException("Interview not found"));
 
-        List<Question> questions = questionRepository.findRandomQuestions(
+        List<Question> questions= questionRepository.findRandomQuestions(
                 interview.getCompany(),
+                interview.getRole(),
                 interview.getDifficulty(),
                 interview.getTotalQuestions()
         );

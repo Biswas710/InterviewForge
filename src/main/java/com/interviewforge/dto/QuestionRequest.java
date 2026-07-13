@@ -8,7 +8,7 @@ import lombok.Setter;
 public class QuestionRequest {
 
     private String company;
-
+    private String role;
     private String topic;
 
     private String difficulty;

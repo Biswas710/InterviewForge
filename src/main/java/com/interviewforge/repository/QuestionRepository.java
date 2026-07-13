@@ -14,12 +14,14 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     @Query(value = """
     SELECT * FROM questions
     WHERE company = :company
-    AND difficulty = :difficulty
+      AND role = :role
+      AND difficulty = :difficulty
     ORDER BY RAND()
     LIMIT :limit
     """, nativeQuery = true)
     List<Question> findRandomQuestions(
             @Param("company") String company,
+            @Param("role") String role,
             @Param("difficulty") String difficulty,
             @Param("limit") int limit
     );

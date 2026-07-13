@@ -20,6 +20,7 @@ public class QuestionServiceImpl implements QuestionService {
 
         Question question = Question.builder()
                 .company(request.getCompany())
+                .role(request.getRole())
                 .topic(request.getTopic())
                 .difficulty(request.getDifficulty())
                 .question(request.getQuestion())
@@ -39,12 +40,14 @@ public class QuestionServiceImpl implements QuestionService {
                 .map(question -> QuestionResponse.builder()
                         .id(question.getId())
                         .company(question.getCompany())
+                        .role(question.getRole())
                         .topic(question.getTopic())
                         .difficulty(question.getDifficulty())
                         .question(question.getQuestion())
                         .answer(question.getAnswer())
                         .build())
                 .toList();
+
     }
 
     @Override
@@ -56,6 +59,7 @@ public class QuestionServiceImpl implements QuestionService {
         return QuestionResponse.builder()
                 .id(question.getId())
                 .company(question.getCompany())
+                .role(question.getRole())
                 .topic(question.getTopic())
                 .difficulty(question.getDifficulty())
                 .question(question.getQuestion())
@@ -70,11 +74,11 @@ public class QuestionServiceImpl implements QuestionService {
                 .orElseThrow(() -> new RuntimeException("Question not found"));
 
         question.setCompany(request.getCompany());
+        question.setRole(request.getRole());
         question.setTopic(request.getTopic());
         question.setDifficulty(request.getDifficulty());
         question.setQuestion(request.getQuestion());
         question.setAnswer(request.getAnswer());
-
         questionRepository.save(question);
 
         return "Question updated successfully";
@@ -98,6 +102,7 @@ public class QuestionServiceImpl implements QuestionService {
                 .map(question -> QuestionResponse.builder()
                         .id(question.getId())
                         .company(question.getCompany())
+                        .role(question.getRole())
                         .topic(question.getTopic())
                         .difficulty(question.getDifficulty())
                         .question(question.getQuestion())
