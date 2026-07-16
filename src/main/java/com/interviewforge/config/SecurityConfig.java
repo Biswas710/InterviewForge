@@ -49,7 +49,7 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.DELETE, "/api/questions/**")
                         .hasRole("ADMIN")
-
+                        .requestMatchers("/test-gemini").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter,

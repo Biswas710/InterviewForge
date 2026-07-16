@@ -5,6 +5,7 @@ import com.interviewforge.dto.InterviewQuestionResponse;
 import com.interviewforge.dto.InterviewRequest;
 import com.interviewforge.dto.InterviewResponse;
 
+import com.interviewforge.service.GeminiService;
 import com.interviewforge.service.InterviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,17 @@ public class InterviewController {
     public String createInterview(@Valid @RequestBody InterviewRequest request) {
         return interviewService.createInterview(request);
     }
+    private final GeminiService geminiService;
 
+    @GetMapping("/test-gemini")
+    public String testGemini() {
+
+        return geminiService.evaluateAnswer(
+                "What is JVM?",
+                "JVM is Java Virtual Machine responsible for running Java bytecode.",
+                "JVM runs Java programs."
+        );
+    }
     @GetMapping
     public List<InterviewResponse> getMyInterviews() {
         return interviewService.getMyInterviews();
