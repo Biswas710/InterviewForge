@@ -3,6 +3,7 @@ package com.interviewforge.service;
 import com.interviewforge.dto.GeminiContent;
 import com.interviewforge.dto.GeminiPart;
 import com.interviewforge.dto.GeminiRequest;
+import com.interviewforge.dto.GeminiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -36,11 +37,22 @@ public class GeminiServiceImpl implements GeminiService {
             Candidate Answer:
             %s
 
-            Evaluate the answer and provide:
-            1. Score out of 10
-            2. Strengths
-            3. Weaknesses
-            4. Correct Answer
+                Compare the candidate answer with the expected answer.
+                
+                                  Scoring Rules:
+                                  - 10/10: Candidate answer is semantically identical to the expected answer, even if wording differs.
+                                  - 9–10: Minor grammatical or spelling mistakes only.
+                                  - 7–8: Correct concept but missing some important details.
+                                  - 4–6: Partially correct with significant missing concepts.
+                                  - 0–3: Incorrect or irrelevant answer.
+                
+                                  Do NOT deduct marks for wording differences if the meaning is the same.
+                
+                                  Return:
+                                  Score: X/10
+                                  Strengths:
+                                  Weaknesses:
+                                  Correct Answer:
             """
                 .formatted(question, expectedAnswer, userAnswer);
 
@@ -54,18 +66,22 @@ public class GeminiServiceImpl implements GeminiService {
                 )
         );
 
-        String response = webClientBuilder.build()
+        GeminiResponse response = webClientBuilder.build()
                 .post()
                 .uri(apiUrl + "?key=" + apiKey)
                 .bodyValue(request)
-                .exchangeToMono(clientResponse ->
-                        clientResponse.bodyToMono(String.class)
-                )
+                .retrieve()
+                .bodyToMono(GeminiResponse.class)
                 .block();
 
         System.out.println(response);
 
-        return response;
+        return response.getCandidates()
+                .get(0)
+                .getContent()
+                .getParts()
+                .get(0)
+                .getText();
     }
 
 

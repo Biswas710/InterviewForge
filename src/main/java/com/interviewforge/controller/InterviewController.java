@@ -33,7 +33,7 @@ public class InterviewController {
         return geminiService.evaluateAnswer(
                 "What is JVM?",
                 "JVM is Java Virtual Machine responsible for running Java bytecode.",
-                "JVM runs Java programs."
+                "JVM is Java"
         );
     }
     @GetMapping
