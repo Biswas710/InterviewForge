@@ -12,13 +12,13 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     List<Question> findByCompanyIgnoreCase(String company);
 
     @Query(value = """
-    SELECT * FROM questions
-    WHERE company = :company
-      AND role = :role
-      AND difficulty = :difficulty
-    ORDER BY RAND()
-    LIMIT :limit
-    """, nativeQuery = true)
+SELECT * FROM questions
+WHERE LOWER(company) = LOWER(:company)
+  AND LOWER(role) = LOWER(:role)
+  AND LOWER(difficulty) = LOWER(:difficulty)
+ORDER BY RAND()
+LIMIT :limit
+""", nativeQuery = true)
     List<Question> findRandomQuestions(
             @Param("company") String company,
             @Param("role") String role,

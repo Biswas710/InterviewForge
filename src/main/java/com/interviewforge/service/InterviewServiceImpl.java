@@ -20,6 +20,7 @@ public class InterviewServiceImpl implements InterviewService {
     private final InterviewRepository interviewRepository;
     private final UserRepository userRepository;
     private final QuestionRepository questionRepository;
+    private final GeminiService geminiService;
     private final InterviewAnswerRepository interviewAnswerRepository;
     private final InterviewQuestionRepository interviewQuestionRepository;
    @Override
@@ -71,20 +72,68 @@ public class InterviewServiceImpl implements InterviewService {
                     answerRequest.getQuestionId()
             ).orElseThrow(() ->
                     new RuntimeException("Question not found"));
+            EvaluationResult evaluation = geminiService.evaluateAnswer(
+                    question.getQuestion(),
+                    question.getAnswer(),
+                    answerRequest.getUserAnswer()
+            );
 
             InterviewAnswer answer = InterviewAnswer.builder()
                     .interview(interview)
                     .question(question)
                     .userAnswer(answerRequest.getUserAnswer())
+                    .score(evaluation.getScore())
+                    .aiFeedback(evaluation.getFeedback())
                     .build();
 
             interviewAnswerRepository.save(answer);
+
+
         }
 
         interview.setStatus("COMPLETED");
         interview.setCompletedAt(LocalDateTime.now());
 
         interviewRepository.save(interview);
+    }
+    @Override
+    public InterviewResultResponse getInterviewResult(Long interviewId) {
+
+        User user = getCurrentUser();
+
+        Interview interview = interviewRepository
+                .findByIdAndUser(interviewId, user)
+                .orElseThrow(() -> new RuntimeException("Interview not found"));
+
+        List<InterviewAnswer> answers =
+                interviewAnswerRepository.findByInterview(interview);
+
+        int totalScore = answers.stream()
+                .mapToInt(InterviewAnswer::getScore)
+                .sum();
+
+        double averageScore = answers.isEmpty()
+                ? 0
+                : (double) totalScore / answers.size();
+
+        List<AnswerResultResponse> result = answers.stream()
+                .map(answer -> AnswerResultResponse.builder()
+                        .question(answer.getQuestion().getQuestion())
+                        .expectedAnswer(answer.getQuestion().getAnswer())
+                        .userAnswer(answer.getUserAnswer())
+                        .score(answer.getScore())
+                        .feedback(answer.getAiFeedback())
+                        .build())
+                .toList();
+
+        return InterviewResultResponse.builder()
+                .interviewId(interview.getId())
+                .company(interview.getCompany())
+                .role(interview.getRole())
+                .totalScore(totalScore)
+                .averageScore(averageScore)
+                .answers(result)
+                .build();
     }
 
     @Override

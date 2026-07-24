@@ -1,9 +1,6 @@
 package com.interviewforge.controller;
 
-import com.interviewforge.dto.AnswerSubmissionRequest;
-import com.interviewforge.dto.InterviewQuestionResponse;
-import com.interviewforge.dto.InterviewRequest;
-import com.interviewforge.dto.InterviewResponse;
+import com.interviewforge.dto.*;
 
 import com.interviewforge.service.GeminiService;
 import com.interviewforge.service.InterviewService;
@@ -26,16 +23,15 @@ public class InterviewController {
         return interviewService.createInterview(request);
     }
     private final GeminiService geminiService;
+    @GetMapping("/{id}/result")
+    public ResponseEntity<InterviewResultResponse> getResult(
+            @PathVariable Long id) {
 
-    @GetMapping("/test-gemini")
-    public String testGemini() {
-
-        return geminiService.evaluateAnswer(
-                "What is JVM?",
-                "JVM is Java Virtual Machine responsible for running Java bytecode.",
-                "JVM is Java"
+        return ResponseEntity.ok(
+                interviewService.getInterviewResult(id)
         );
     }
+
     @GetMapping
     public List<InterviewResponse> getMyInterviews() {
         return interviewService.getMyInterviews();

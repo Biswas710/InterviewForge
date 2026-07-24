@@ -1,10 +1,14 @@
 package com.interviewforge.service;
 
+import com.interviewforge.dto.EvaluationResult;
+
 public interface GeminiService {
 
-    String evaluateAnswer(
-            String question,
-            String expectedAnswer,
-            String userAnswer
-    );
-}
+
+
+        EvaluationResult evaluateAnswer(
+                String question,
+                String expectedAnswer,
+                String userAnswer
+        );
+    }
